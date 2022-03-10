@@ -1,11 +1,14 @@
 package com.liuxc.www.microboot.start.web;
 
+import com.liuxc.www.microboot.start.comm.abs.AbstractBaseController;
+import com.liuxc.www.microboot.start.domain.Message;
+import com.liuxc.www.microboot.start.domain.User;
 import com.liuxc.www.microboot.start.service.IMessageService;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class MessageController {
+public class MessageController extends AbstractBaseController {
 
     private final IMessageService messageService;
 
@@ -18,4 +21,17 @@ public class MessageController {
 
         return "[echo]" + messageService.echo(message);
     }
+
+    @RequestMapping("/echo2")
+    public Object echo2(Message message) {
+
+        return message;
+    }
+
+    @RequestMapping("/echo3")
+    public Object echo3(User user) {
+
+        return user;
+    }
+
 }

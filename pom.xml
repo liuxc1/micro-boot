@@ -8,6 +8,7 @@
     <version>0.0.1-SNAPSHOT</version>
     <modules>
         <module>micro-boot-start</module>
+        <module>micro-boot-comm</module>
     </modules>
     <name>micro-boot</name>
     <description>micro-boot</description>
