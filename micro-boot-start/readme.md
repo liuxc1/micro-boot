@@ -362,4 +362,107 @@ public class User {
   <version>5.5.13.3</version>
 </dependency>
 ```
-## 整合响应Excel数据
+## 整合响应返回图像流数据
+> 1.增加图片消息转换器配置
+```java
+  /**
+ * 处理图像转换器
+ */
+@Configuration
+public class ImageConvertConfig implements WebMvcConfigurer {
+
+  @Override
+  public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
+    converters.add(new BufferedImageHttpMessageConverter());
+  }
+}
+```
+>2.controller返回图片流数据
+```java
+@RestController
+@RequestMapping("/image")
+public class ImageController {
+
+    @RequestMapping(value = "/getImage", produces = {MediaType.IMAGE_GIF_VALUE, MediaType.IMAGE_JPEG_VALUE, MediaType.IMAGE_PNG_VALUE})
+    public Object getImage() throws IOException {
+        //读取资源文件
+        ClassPathResource resource = new ClassPathResource("images/111.jpeg");
+        return ImageIO.read(resource.getInputStream());
+    }
+}
+```
+## 整合响应返回视频流数据
+>1.创建视频流处理handle
+```java
+@Component
+public class VideoResponseHandle extends ResourceHttpRequestHandler {
+    @Override
+    protected Resource getResource(HttpServletRequest request) throws IOException {
+        return new ClassPathResource("video/1111.mp4");
+    }
+}
+```
+>2.创建响应controller
+```java
+@RestController
+@RequestMapping("/video")
+public class VideoController {
+    private final VideoResponseHandle videoResponseHandle;
+
+    public VideoController(VideoResponseHandle videoResponseHandle) {
+        this.videoResponseHandle = videoResponseHandle;
+    }
+    @RequestMapping("/getVideo")
+    public void getVideo(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        this.videoResponseHandle.handleRequest(request, response);
+    }
+}
+```
+##属性定义与注入
+>属性注入使用SpringEl表达进行注入
+```yaml
+source:
+  mysql: locahost:3306/mysql
+  redis: localhost:6379
+  info: "{name:'xxx',age:'xxx'}" #注入map集合
+  messages: liuxc,liuxc1  #注入list集合
+```
+```java
+@RestController
+@RequestMapping("/fieldInject")
+public class FieldInjectController {
+    //使用springEl进行属性的注入
+    @Value("${source.mysql}")
+    private String mysql;
+    @Value("${source.redis}")
+    private String redis;
+    @Value("#{${source.info}}")
+    private Map<String, Object> info;
+    @Value("${source.messages}")
+    private List<String> messages;
+    @RequestMapping("/show")
+    public Object show() {
+        Map<String, Object> resultMap = new HashMap<>();
+        resultMap.put("mysql", mysql);
+        resultMap.put("redis", redis);
+        resultMap.put("info", info);
+        resultMap.put("messages", messages);
+        return resultMap;
+    }
+}
+```
+## @ConfigurationProperties属性的注入方式
+>在整个spring boot里面对于属性的注入的操作除了可以采用原始的spring的方式手工完成
+> 也可以基于Bean的方式自动配置完成
+```java
+@Component
+@ConfigurationProperties(prefix = "source")
+@Data
+public class Source {
+    //使用自动bean注入
+    private String mysql;
+    private String redis;
+    private Map<String, Object> info;
+    private List<String> messages;
+}
+```

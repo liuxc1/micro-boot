@@ -1,0 +1,9 @@
+source:
+  mysql: locahost:3306/mysql
+  redis: localhost:6379
+  info:
+    name: xxx
+    age: xxx #注入map集合
+  messages:
+    - liuxc
+    - liuxc1  #注入list集合
