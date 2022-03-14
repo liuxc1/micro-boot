@@ -124,9 +124,8 @@ public class MessageServiceTest {
 
 * chain 模式
 
->访问链的模式:在每个setter方法里面都返回有当前对象实例，这样就可以直接基于代码链的方式配置。
->在大部分情况下基于反射的模式来获取setter方法对象都是采用void返回值类型来进行获取的，所以即便此时有了返回值，那么程序也无法正常的采用代码链的进行处理。
-
+> 访问链的模式:在每个setter方法里面都返回有当前对象实例，这样就可以直接基于代码链的方式配置。
+> 在大部分情况下基于反射的模式来获取setter方法对象都是采用void返回值类型来进行获取的，所以即便此时有了返回值，那么程序也无法正常的采用代码链的进行处理。
 
 ```
     @Data
@@ -146,7 +145,9 @@ public class MessageServiceTest {
 ```
 
 * prefix 模式
->配置前缀操作,在生成get,set方法是会去掉根据配置的前缀生成方法
+
+> 配置前缀操作,在生成get,set方法是会去掉根据配置的前缀生成方法
+
 ```
 @Data
 @Accessors(prefix = "liux")
@@ -163,8 +164,11 @@ public void test(){
   System.out.println(user);
 }
 ```
+
 ### Builder模式
+
 > 使用builder注解，会生成一个内部builder类，内部使用的是访问者模式的 chain
+
 ```
 @Data
 @Builder
@@ -179,8 +183,11 @@ public class User {
         User user = User.builder().userName("xxx").userName("xxx").build();
     }
 ```
+
 ### 异常处理操作
->帮助用户自动进行异常捕获
+
+> 帮助用户自动进行异常捕获
+
 ```
 //常规处理异常的方式
 public class MessageHandler {
@@ -205,7 +212,9 @@ public class MessageHandler {
     }
 }
 ```
+
 ### 自动关闭IO流 @Cleanup
+
 ``` java
     @SneakyThrows
     public void red(){
@@ -234,53 +243,64 @@ public class MessageHandler {
     } 
   }
 ```
+
 ## rest对象转换
+
 ```java
   //参数转换操作
+
 /**
  * 参数转换操作类
  */
 public abstract class AbstractBaseController {
-  // 在现在的开发之中如果要将字符串转为日期时间，考虑到多线程环境下的并发问题，所以一定要使用LocalDate
-  private static final DateTimeFormatter LOCAL_DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    // 在现在的开发之中如果要将字符串转为日期时间，考虑到多线程环境下的并发问题，所以一定要使用LocalDate
+    private static final DateTimeFormatter LOCAL_DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-  @InitBinder
-  public void initBinder(WebDataBinder binder) {
-    System.out.println("initBinder");
-    binder.registerCustomEditor(Date.class, new PropertyEditorSupport() {
-      @Override
-      public void setAsText(String text) throws IllegalArgumentException {
-        LocalDate localDate = LocalDate.parse(text, LOCAL_DATE_FORMAT);
-        Instant instant = localDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant();
-        super.setValue(Date.from(instant));
-      }
-    });
-  }
+    @InitBinder
+    public void initBinder(WebDataBinder binder) {
+        System.out.println("initBinder");
+        binder.registerCustomEditor(Date.class, new PropertyEditorSupport() {
+            @Override
+            public void setAsText(String text) throws IllegalArgumentException {
+                LocalDate localDate = LocalDate.parse(text, LOCAL_DATE_FORMAT);
+                Instant instant = localDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant();
+                super.setValue(Date.from(instant));
+            }
+        });
+    }
 }
 
 //使用参数转换
 @RestController
 public class MessageController extends AbstractBaseController {
-  @RequestMapping("/echo2")
-  public Object echo2(Message message) {
+    @RequestMapping("/echo2")
+    public Object echo2(Message message) {
 
-    return message;
-  }
+        return message;
+    }
 
 }
 ```
+
 ## Jackson组件更换为FastJson
->不推荐将spring Boot中的Jackson更换为FastJson
+
+> 不推荐将spring Boot中的Jackson更换为FastJson
+
 * 1.引入FastJson依赖
+
 ```xml
-  <dependency>
-      <groupId>com.alibaba</groupId>
-      <artifactId>fastjson</artifactId>
-      <version>1.2.79</version>
-  </dependency>
+
+<dependency>
+    <groupId>com.alibaba</groupId>
+    <artifactId>fastjson</artifactId>
+    <version>1.2.79</version>
+</dependency>
 ```
+
 * 2.替换Jackson
+
 ```java
+
 @Configuration
 public class FastJsonConfig extends WebMvcConfigurationSupport {
 
@@ -289,7 +309,7 @@ public class FastJsonConfig extends WebMvcConfigurationSupport {
         //1.清除原用的JackSon处理方式
         for (int i = 0; i < converters.size(); i++) {
             if (converters.get(i) instanceof MappingJackson2HttpMessageConverter) {
-               converters.remove(i);// 删除当前的转换器
+                converters.remove(i);// 删除当前的转换器
             }
         }
         //2.创建FastJson转换器
@@ -314,8 +334,11 @@ public class FastJsonConfig extends WebMvcConfigurationSupport {
     }
 }
 ```
+
 * 3.测试修改vo类，替换是否成功
+
 ```java
+
 @Data
 public class Message {
     private String title;
@@ -324,16 +347,23 @@ public class Message {
     private Date publishDate;
 }
 ```
+
 ## 整合响应Xml数据
+
 * 1.引用maven相关依赖包
+
 ```xml
+
 <dependency>
-  <groupId>com.fasterxml.jackson.dataformat</groupId>
-  <artifactId>jackson-dataformat-xml</artifactId>
+    <groupId>com.fasterxml.jackson.dataformat</groupId>
+    <artifactId>jackson-dataformat-xml</artifactId>
 </dependency>
 ```
+
 * 2.修改vo配置类，增加xml相关注解
+
 ```java
+
 @Data
 @XmlRootElement
 public class User {
@@ -345,25 +375,35 @@ public class User {
     private String passWord;
 }
 ```
+
 * 3.响应结果
+
 ```xml
+
 <User>
-  <id>1</id>
-  <userName>xxx</userName>
-  <passWord>xxx</passWord>
+    <id>1</id>
+    <userName>xxx</userName>
+    <passWord>xxx</passWord>
 </User>
 ```
+
 ## 整合响应PDF数据
->引用maven相关依赖包
+
+> 引用maven相关依赖包
+
 ```xml
+
 <dependency>
-  <groupId>com.itextpdf</groupId>
-  <artifactId>itextpdf</artifactId>
-  <version>5.5.13.3</version>
+    <groupId>com.itextpdf</groupId>
+    <artifactId>itextpdf</artifactId>
+    <version>5.5.13.3</version>
 </dependency>
 ```
+
 ## 整合响应返回图像流数据
+
 > 1.增加图片消息转换器配置
+
 ```java
   /**
  * 处理图像转换器
@@ -371,14 +411,17 @@ public class User {
 @Configuration
 public class ImageConvertConfig implements WebMvcConfigurer {
 
-  @Override
-  public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
-    converters.add(new BufferedImageHttpMessageConverter());
-  }
+    @Override
+    public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
+        converters.add(new BufferedImageHttpMessageConverter());
+    }
 }
 ```
->2.controller返回图片流数据
+
+> 2.controller返回图片流数据
+
 ```java
+
 @RestController
 @RequestMapping("/image")
 public class ImageController {
@@ -391,9 +434,13 @@ public class ImageController {
     }
 }
 ```
+
 ## 整合响应返回视频流数据
->1.创建视频流处理handle
+
+> 1.创建视频流处理handle
+
 ```java
+
 @Component
 public class VideoResponseHandle extends ResourceHttpRequestHandler {
     @Override
@@ -402,8 +449,11 @@ public class VideoResponseHandle extends ResourceHttpRequestHandler {
     }
 }
 ```
->2.创建响应controller
+
+> 2.创建响应controller
+
 ```java
+
 @RestController
 @RequestMapping("/video")
 public class VideoController {
@@ -412,14 +462,18 @@ public class VideoController {
     public VideoController(VideoResponseHandle videoResponseHandle) {
         this.videoResponseHandle = videoResponseHandle;
     }
+
     @RequestMapping("/getVideo")
     public void getVideo(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         this.videoResponseHandle.handleRequest(request, response);
     }
 }
 ```
-##属性定义与注入
->属性注入使用SpringEl表达进行注入
+
+## 属性定义与注入
+
+> 属性注入使用SpringEl表达进行注入
+
 ```yaml
 source:
   mysql: locahost:3306/mysql
@@ -427,7 +481,9 @@ source:
   info: "{name:'xxx',age:'xxx'}" #注入map集合
   messages: liuxc,liuxc1  #注入list集合
 ```
+
 ```java
+
 @RestController
 @RequestMapping("/fieldInject")
 public class FieldInjectController {
@@ -440,6 +496,7 @@ public class FieldInjectController {
     private Map<String, Object> info;
     @Value("${source.messages}")
     private List<String> messages;
+
     @RequestMapping("/show")
     public Object show() {
         Map<String, Object> resultMap = new HashMap<>();
@@ -451,10 +508,14 @@ public class FieldInjectController {
     }
 }
 ```
+
 ## @ConfigurationProperties属性的注入方式
->在整个spring boot里面对于属性的注入的操作除了可以采用原始的spring的方式手工完成
+
+> 在整个spring boot里面对于属性的注入的操作除了可以采用原始的spring的方式手工完成
 > 也可以基于Bean的方式自动配置完成
+
 ```java
+
 @Component
 @ConfigurationProperties(prefix = "source")
 @Data
@@ -466,3 +527,271 @@ public class Source {
     private List<String> messages;
 }
 ```
+
+## 注入对象数据
+
+> 对象实体
+
+```java
+
+@Data
+@ConfigurationProperties(prefix = "dept")
+@Component
+public class Dept {
+    private Integer did;
+    private String dname;
+    private Company company;
+    private List<Employee> employees;
+}
+```
+
+> yml第一种方式配置
+
+```yaml
+dept:
+  did: 001
+  dname: 研发部
+  company:
+    cid: 002
+    cname: 科技无限
+  employees:
+    - employee:
+      eid: 003
+      ename: 张三
+      job: 开发
+    - employee:
+      eid: 004
+      ename: 李四
+      job: 测试
+```
+
+> yml第二种方式配置
+
+```yaml
+dept:
+  did: 001
+  dname: 研发部
+  company:
+    cid: 002
+    cname: 科技无限
+  employees[0]:
+    eid: 003
+    ename: 张三
+    job: 开发
+  employees[1]:
+    eid: 004
+    ename: 李四
+    job: 测试
+```
+
+## 自定义配置属性 @PropertySource
+
+```java
+
+@Data
+//指定配置文件的路径
+@PropertySource(value = "classpath:dept.properties", encoding = "UTF-8")
+@ConfigurationProperties(prefix = "dept")
+@Component
+public class Dept {
+    private Integer did;
+    private String dname;
+    private Company company;
+    private List<Employee> employees;
+}
+```
+
+> 编写dept配置文件property
+
+```properties
+dept.did=001
+dept.dname=研发部
+dept.company.cid=002
+dept.company.cname=科技无限
+dept.employees[0].eid=003
+dept.employees[0].ename=张三
+dept.employees[0].job=开发
+dept.employees[1].eid=004
+dept.employees[1].ename=李四
+dept.employees[1].job=测试
+```
+
+## 打成war包启动
+
+> 1.在启动类中继承 SpringBootServletInitializer
+> 2.修改打包方式 <packaging>war</packaging>
+
+## 整合jetty Web容器
+
+> 1.排除掉默认tomcat容器依赖包
+
+```xml
+
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-web</artifactId>
+    <exclusions>
+        <exclusion>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-tomcat</artifactId>
+        </exclusion>
+    </exclusions>
+</dependency>
+```
+
+> 2.引用jetty依赖，即整合完毕。整合Undertow容器也是如此
+
+```xml
+
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-jetty</artifactId>
+</dependency>
+```
+
+## 获取web 内置对象
+
+> 可以通过spring mvc 的形参注入，还可以通过RequestContextHolder这个类获取内置对象。
+
+```java
+  //ServletWebRequest requestAttributes = (ServletWebRequest)RequestContextHolder.getRequestAttributes();
+//HttpServletRequest request1 = requestAttributes.getRequest();
+// HttpServletResponse response1 = requestAttributes.getResponse();
+```
+
+## 整合web过滤器
+
+> 方式1使用原生的方式，在启动类中增加@ServletComponentScan注解
+> 该方式但是不能设置过滤器的执行顺序
+
+```java
+/**
+ * 自定义过滤器
+ */
+@WebFilter(urlPatterns = "/*")//定义要匹配的路径
+public class MyFilter extends HttpFilter {
+    @Override
+    protected void doFilter(HttpServletRequest req, HttpServletResponse res, FilterChain chain) throws IOException, ServletException {
+        System.out.println("****执行MyFilter*****");
+        super.doFilter(req, res, chain);
+    }
+}
+```
+
+> 方式2 使用注册Filter的方式FilterRegistrationBean，该方式推荐使用，可以设置执行顺序
+
+```java
+
+/**
+ * 配置过滤器
+ */
+@Configuration
+public class WebFilterConfig {
+    @Bean
+    public FilterRegistrationBean<MyFilter2> registrationMyFilter2() {
+        FilterRegistrationBean<MyFilter2> registrationBean = new FilterRegistrationBean<MyFilter2>();
+        registrationBean.setFilter(this.getMyFilter2());//设置自定义的filter
+        registrationBean.addUrlPatterns("/*");//添加需要拦截的路径
+        registrationBean.setOrder(100);//设置顺序
+        return registrationBean;
+    }
+
+    @Bean
+    public MyFilter2 getMyFilter2() {
+        return new MyFilter2();
+    }
+}
+```
+
+## 整合web监听器
+
+> 方式一和filter一样使用注解扫描包的方式 ServletComponentScan
+
+```java
+/**
+ * 自定义监听器
+ */
+@WebListener
+public class MyListener implements ServletContextListener {
+    @Override
+    public void contextInitialized(ServletContextEvent sce) {
+        System.out.println("监听器触发了");
+        ServletContextListener.super.contextInitialized(sce);
+    }
+}
+```
+
+> 方式2 使用注册监听器方式 ServletListenerRegistrationBean
+
+## 整合拦截器
+
+* 1.实现HandlerInterceptor接口，自定义拦截器
+
+```java
+public class MyInterceptor implements HandlerInterceptor {
+    @Override
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        System.out.println("加载自定义拦截器MyInterceptor");
+        return true;
+    }
+}
+```
+
+*2.增加拦截器配置类，配置执行顺序和拦截路径等
+
+```java
+
+@Configuration
+public class WebInterceptorConfig implements WebMvcConfigurer {
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(getMyInterceptor()).addPathPatterns("/**").order(1);
+    }
+
+    @Bean
+    public MyInterceptor getMyInterceptor() {
+        return new MyInterceptor();
+    }
+}
+```
+
+## 整合AOP拦截
+
+*1.引入AOP相关依赖
+
+```xml
+
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-aop</artifactId>
+</dependency>
+```
+
+*2.编写AOP拦截类
+
+```java
+
+@Component
+@Aspect
+public class AOPInterceptor {
+    @Around("execution(* com.liuxc.www.microboot.start.service..*.*(..))")
+    public Object aroundInterceptor(ProceedingJoinPoint point) throws Throwable {
+        System.out.println("开始执行AOPInterceptor。。。");
+        return point.proceed(point.getArgs());
+    }
+}
+```
+
+## 整合邮件服务
+
+> pom文件中引入相关配置包，并在yml文件中加入文件相关的配置。
+
+```xml
+
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-mail</artifactId>
+</dependency>
+```
+

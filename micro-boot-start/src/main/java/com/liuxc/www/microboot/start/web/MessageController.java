@@ -1,5 +1,6 @@
 package com.liuxc.www.microboot.start.web;
 
+
 import com.liuxc.www.microboot.start.comm.abs.AbstractBaseController;
 import com.liuxc.www.microboot.start.domain.Message;
 import com.liuxc.www.microboot.start.domain.User;

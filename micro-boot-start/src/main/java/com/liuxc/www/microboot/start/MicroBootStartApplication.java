@@ -4,12 +4,15 @@ import com.liuxc.www.microboot.start.banner.CustomBannerImpl;
 import org.springframework.boot.Banner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.web.servlet.ServletComponentScan;
+import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.ImportResource;
 
 
 @SpringBootApplication
 @ImportResource({"classpath:conf/spring.xml"})
-public class MicroBootStartApplication {
+@ServletComponentScan
+public class MicroBootStartApplication extends SpringBootServletInitializer {
 
     public static void main(String[] args) {
         //创建应用实例
