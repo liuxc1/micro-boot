@@ -795,3 +795,78 @@ public class AOPInterceptor {
 </dependency>
 ```
 
+##全局错误页面
+>注册全局错误页面跳转页面
+```java
+@Configuration
+public class ErrorConfig implements ErrorPageRegistrar {
+    @Override
+    public void registerErrorPages(ErrorPageRegistry registry) {
+        registry.addErrorPages(
+                new ErrorPage(HttpStatus.NOT_FOUND, "/error/error_404"),// 已经添加了新的错误页
+                new ErrorPage(HttpStatus.INTERNAL_SERVER_ERROR, "/error/error_500") // // 已经添加了新的错误页
+        );
+    }
+}
+```
+>响应rest请求
+```java
+/**
+ * 全局异常处理类
+ */
+@RestController
+@RequestMapping("/error")
+public class ErrorController {
+
+    @RequestMapping("/error_404")
+    public Object error_404() {
+        return getObject("无法找到用户访问路径。");
+    }
+
+    @RequestMapping("/error_500")
+    public Object error_500() {
+        return getObject("服务器内部错误。");
+    }
+
+    private Object getObject(String content) {
+        ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        assert requestAttributes != null;
+        HttpServletRequest request = requestAttributes.getRequest();
+        HttpServletResponse response = requestAttributes.getResponse();
+        Map<String, Object> errMap = new HashMap<String, Object>();
+        Enumeration<String> headerNames = request.getHeaderNames();
+        while (headerNames.hasMoreElements()) {
+            String element = headerNames.nextElement();
+            System.out.println(element + "===>" + request.getHeader(element));
+        }
+        assert response != null;
+        errMap.put("status", response.getStatus()); // 响应编码
+        errMap.put("content", content); // 适当性的带一点文字描述
+        errMap.put("referer", request.getHeader("Referer")); // 获取之前的来源
+        errMap.put("path", request.getRequestURI()); // 访问路径
+        return errMap;
+    }
+}
+```
+##全局异常处理
+```java
+/**
+ * 全局异常处理类
+ */
+@ControllerAdvice
+public class GlobalExceptionAdvice {
+    
+    @ResponseBody // 本次的处理是基于Rest风格完成的
+    @ExceptionHandler(Exception.class)
+    public Object exceptionHandler(Exception exception){
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+        HttpServletResponse response = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getResponse();
+        Map<String,Object> map = new HashMap<String,Object>();
+        map.put("message", exception.getMessage()); // 直接获取异常信息
+        map.put("status", HttpStatus.INTERNAL_SERVER_ERROR_500); // 设置一个HTTP状态码
+        map.put("exception", exception.getClass().getName()); // 获取异常类型
+        map.put("path", request.getRequestURI()); // 异常发生的路径
+        return map; // 直接返回对象
+    }
+}
+```

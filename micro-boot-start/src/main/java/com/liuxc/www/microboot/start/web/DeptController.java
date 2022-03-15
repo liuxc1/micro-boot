@@ -17,6 +17,7 @@ public class DeptController {
 
     @RequestMapping("/show")
     public Dept show() {
+        int i = 1 / 0;
 
         return this.dept;
     }
