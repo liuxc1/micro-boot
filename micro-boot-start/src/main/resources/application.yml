@@ -1,3 +1,20 @@
+server:
+  port: 8080
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*' #暴露所有服务
+      base-path: /actuator #访问的父路径
+  endpoint:
+    shutdown:
+      enabled: true
+  server:
+    port: 8081
+info:
+  app:
+    name: SpringBoot微服务
+
 source:
   mysql: locahost:3306/mysql
   redis: localhost:6379
@@ -7,3 +24,15 @@ source:
   messages:
     - liuxc
     - liuxc1  #注入list集合
+
+logging:
+  level:
+    ROOT:DE
+
+  pattern:
+    console:
+    file:
+
+
+
+

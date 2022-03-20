@@ -870,3 +870,54 @@ public class GlobalExceptionAdvice {
     }
 }
 ```
+##整合actuator
+>pom引入监控包
+```xml
+  <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-actuator</artifactId>
+  </dependency>
+```
+>配置yml文件，打开所有应用监控
+> 相关节点访问路径：[https://www.cnblogs.com/JpfBlog66/p/14237909.html](https://www.cnblogs.com/JpfBlog66/p/14237909.html)
+```yaml
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*' #暴露所有服务
+      base-path: /actuator #访问的父路径
+  endpoint:
+    shutdown:
+      enabled: true
+  server:
+    port: 8081
+info:
+  app:
+    name: SpringBoot微服务
+```
+>自定义endpoint
+
+|注解	|描述	|类比
+|------ |----:  |----
+|@Endpoint|	该注解的类可以通过http查看也可以通过jmx查看，他是在两个地方注册	|相当于springmvc中的RestController和JMX中MBean的集合
+|@JmxEndpoint	|该注解的类开放的是JMX接口	|相当于JMX中的MBean
+|@WebEndpoint	|该注解的类开饭的是http接口	|相当于mvc当中的RestController
+|WriteOperation	|http-POST请求	|相当于mvc中的@PostMapping
+|@ReadOperation	|http- GET请求	|相当于mvc中的@GetMapping
+|@DeleteOpretation	|http- DELETE请求	|相当于mvc中的@DeleteMapping
+
+```java
+
+@Configuration
+@Endpoint(id = "myEndPoint")
+public class MyEndPoint {
+    @ReadOperation
+    public Map<String, Object> getMyEndPoint() {
+        Map<String, Object> resultMap = new HashMap<>();
+        resultMap.put("message", "hello world");
+        return resultMap;
+    }
+}
+
+```
