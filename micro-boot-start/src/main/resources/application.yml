@@ -25,14 +25,16 @@ source:
     - liuxc
     - liuxc1  #注入list集合
 
+
+
 logging:
-  level:
-    ROOT:DE
-
-  pattern:
-    console:
-    file:
-
-
-
-
+  level: # 需要配置Map集合
+    root: info # 基本的日志级别
+    com:
+      liuxc:
+        www:
+          microboot:
+            start:
+              web: trace #指定路径日志级别
+  file:
+    path: logs/microboot #配置日志输出文件路径

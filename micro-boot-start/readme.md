@@ -795,8 +795,10 @@ public class AOPInterceptor {
 </dependency>
 ```
 
-##全局错误页面
->注册全局错误页面跳转页面
+## 全局错误页面
+
+> 注册全局错误页面跳转页面
+
 ```java
 @Configuration
 public class ErrorConfig implements ErrorPageRegistrar {
@@ -809,7 +811,9 @@ public class ErrorConfig implements ErrorPageRegistrar {
     }
 }
 ```
->响应rest请求
+
+> 响应rest请求
+
 ```java
 /**
  * 全局异常处理类
@@ -848,7 +852,9 @@ public class ErrorController {
     }
 }
 ```
-##全局异常处理
+
+## 全局异常处理
+
 ```java
 /**
  * 全局异常处理类
@@ -870,16 +876,21 @@ public class GlobalExceptionAdvice {
     }
 }
 ```
-##整合actuator
->pom引入监控包
+
+## 整合actuator
+
+> pom引入监控包
+
 ```xml
   <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-actuator</artifactId>
   </dependency>
 ```
->配置yml文件，打开所有应用监控
+
+> 配置yml文件，打开所有应用监控
 > 相关节点访问路径：[https://www.cnblogs.com/JpfBlog66/p/14237909.html](https://www.cnblogs.com/JpfBlog66/p/14237909.html)
+
 ```yaml
 management:
   endpoints:
@@ -896,16 +907,17 @@ info:
   app:
     name: SpringBoot微服务
 ```
->自定义endpoint
 
-|注解	|描述	|类比
+> 自定义endpoint
+
+|注解    |描述    |类比
 |------ |----:  |----
-|@Endpoint|	该注解的类可以通过http查看也可以通过jmx查看，他是在两个地方注册	|相当于springmvc中的RestController和JMX中MBean的集合
-|@JmxEndpoint	|该注解的类开放的是JMX接口	|相当于JMX中的MBean
-|@WebEndpoint	|该注解的类开饭的是http接口	|相当于mvc当中的RestController
-|WriteOperation	|http-POST请求	|相当于mvc中的@PostMapping
-|@ReadOperation	|http- GET请求	|相当于mvc中的@GetMapping
-|@DeleteOpretation	|http- DELETE请求	|相当于mvc中的@DeleteMapping
+|@Endpoint|    该注解的类可以通过http查看也可以通过jmx查看，他是在两个地方注册    |相当于springmvc中的RestController和JMX中MBean的集合
+|@JmxEndpoint    |该注解的类开放的是JMX接口    |相当于JMX中的MBean
+|@WebEndpoint    |该注解的类开饭的是http接口    |相当于mvc当中的RestController
+|WriteOperation    |http-POST请求    |相当于mvc中的@PostMapping
+|@ReadOperation    |http- GET请求    |相当于mvc中的@GetMapping
+|@DeleteOpretation    |http- DELETE请求    |相当于mvc中的@DeleteMapping
 
 ```java
 
@@ -921,3 +933,108 @@ public class MyEndPoint {
 }
 
 ```
+
+## 整合日志
+
+* 1.常规使用log日志方式，使用工厂方法获取日志对象
+
+```java
+@RestController
+@RequestMapping("/log4j")
+public class Log4jController {
+    private final Logger logger = LoggerFactory.getLogger(Log4jController.class);
+    @RequestMapping("/show")
+    public Object show(String message) {
+        logger.trace("trace 常规日志输出-->{}",message);
+        logger.info("info 常规日志输出-->{}",message);
+        logger.debug("debug 常规日志输出-->{}",message);
+        logger.warn("WARN 常规日志输出-->{}",message);
+        logger.error("error 常规日志输出-->{}",message);
+        return message;
+    }
+}
+```
+
+> 配置项目日志输出级别
+
+```yaml
+logging:
+  level: # 需要配置Map集合
+    root: info # 基本的日志级别
+    com:
+      liuxc:
+        www:
+          microboot:
+            start:
+              web: trace #指定路径日志级别
+```
+
+* 2.整合使用lombok日志注解
+
+> 使用该注解会在类使用log对象，可直接使用。
+
+```java
+@RestController
+@RequestMapping("/log4j")
+@Slf4j
+public class Log4jController {
+    //private final Logger logger = LoggerFactory.getLogger(Log4jController.class);
+    @RequestMapping("/show")
+    public Object show(String message) {
+        log.trace("trace 常规日志输出-->{}",message);
+        log.info("info 常规日志输出-->{}",message);
+        log.debug("debug 常规日志输出-->{}",message);
+        log.warn("WARN 常规日志输出-->{}",message);
+        log.error("error 常规日志输出-->{}",message);
+        return message;
+    }
+}
+```
+
+```yaml
+logging:
+  level: # 需要配置Map集合
+    root: info # 基本的日志级别
+    com:
+      liuxc:
+        www:
+          microboot:
+            start:
+              web: trace #指定路径日志级别
+  file:
+    path: logs/microboot #配置日志输出文件路径
+  pattern:
+    console: "%clr(%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSS}}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"
+    file: "%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSS}}${LOG_LEVEL_PATTERN:-%5p} ${PID:- } --- [%t] %-40.40logger{39} : %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"
+```
+
+* 3.整合使用logback
+
+> 在项目配置中加logback-spring.xml配置文件详细建配置文件
+
+* 4.动态修改项目日志级别
+>SpringBoot2.0之后可以通过actuator动态调整日志级别，主要是通过暴露loggers这个endpoint来实现
+>> 需要引入actuator
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-actuator</artifactId>
+</dependency>
+```
+>>开启日志访问点
+```yaml
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*' #暴露所有服务
+      base-path: /actuator #访问的父路径
+```
+>> 访问路径http://localhost:8081/actuator/loggers 查看项目日志级别
+>> 动态修改日志级别发送POST请求到：http://[ip]:[port]/actuator/loggers/[包路径]
+>> 需要在body中指定configuredLevel参数； 比如修改整个项目日志级别为error
+
+
+
+
+

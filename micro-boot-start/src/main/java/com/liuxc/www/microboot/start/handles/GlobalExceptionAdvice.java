@@ -1,6 +1,6 @@
 package com.liuxc.www.microboot.start.handles;
 
-import org.eclipse.jetty.http.HttpStatus;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -25,7 +25,7 @@ public class GlobalExceptionAdvice {
         HttpServletResponse response = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getResponse();
         Map<String,Object> map = new HashMap<String,Object>();
         map.put("message", exception.getMessage()); // 直接获取异常信息
-        map.put("status", HttpStatus.INTERNAL_SERVER_ERROR_500); // 设置一个HTTP状态码
+        map.put("status", HttpStatus.INTERNAL_SERVER_ERROR); // 设置一个HTTP状态码
         map.put("exception", exception.getClass().getName()); // 获取异常类型
         map.put("path", request.getRequestURI()); // 异常发生的路径
         return map; // 直接返回对象
