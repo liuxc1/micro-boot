@@ -9,6 +9,7 @@
     <modules>
         <module>micro-boot-start</module>
         <module>micro-boot-comm</module>
+        <module>micro-boot-autoconfiguration</module>
     </modules>
     <name>micro-boot</name>
     <description>micro-boot</description>

@@ -22,5 +22,6 @@ public class MicroBootStartApplication extends SpringBootServletInitializer {
         //设置banner输出模式
         springApplication.setBannerMode(Banner.Mode.CONSOLE);
         springApplication.run(args);
+
     }
 }
