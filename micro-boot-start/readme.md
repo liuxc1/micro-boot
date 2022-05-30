@@ -315,9 +315,8 @@ public class FastJsonConfig extends WebMvcConfigurationSupport {
         //2.创建FastJson转换器
         FastJsonHttpMessageConverter fastJsonHttpMessageConverter = new FastJsonHttpMessageConverter();
         //3.FastJSON在进行最终消息转换处理的时候实际上是需要进行相关配置定义的
-        com.alibaba.fastjson.support.com.liuxc.www.autostart.config.FastJsonConfig com.
-        liuxc.www.autostart.config = new com.alibaba.fastjson.support.com.liuxc.www.autostart.config.FastJsonConfig();
-        com.liuxc.www.autostart.config.setSerializerFeatures(
+        com.alibaba.fastjson.support.config.FastJsonConfig config = new com.alibaba.fastjson.support.config.FastJsonConfig();
+        config.setSerializerFeatures(
                 SerializerFeature.WriteMapNullValue, // 允许Map的内容为null
                 SerializerFeature.WriteNullListAsEmpty, // List集合为null则使用“[]”代替
                 SerializerFeature.WriteNullStringAsEmpty, // String内容为空使用空字符串代替
@@ -325,7 +324,7 @@ public class FastJsonConfig extends WebMvcConfigurationSupport {
                 SerializerFeature.WriteNullNumberAsZero, // 数字为空使用0表示
                 SerializerFeature.DisableCircularReferenceDetect // 禁用循环引用
         );
-        fastJsonHttpMessageConverter.setFastJsonConfig(com.liuxc.www.autostart.config);
+        fastJsonHttpMessageConverter.setFastJsonConfig(config);
         //4.设置转换器处理的媒体类型
         List<MediaType> fastjsonMediaTypes = new ArrayList<>();
         fastjsonMediaTypes.add(MediaType.APPLICATION_JSON);
@@ -796,12 +795,9 @@ public class AOPInterceptor {
 </dependency>
 ```
 
-## 全局错误页面
-
-> 注册全局错误页面跳转页面
-
+##全局错误页面
+>注册全局错误页面跳转页面
 ```java
-
 @Configuration
 public class ErrorConfig implements ErrorPageRegistrar {
     @Override
@@ -813,9 +809,7 @@ public class ErrorConfig implements ErrorPageRegistrar {
     }
 }
 ```
-
-> 响应rest请求
-
+>响应rest请求
 ```java
 /**
  * 全局异常处理类
@@ -854,22 +848,20 @@ public class ErrorController {
     }
 }
 ```
-
-## 全局异常处理
-
+##全局异常处理
 ```java
 /**
  * 全局异常处理类
  */
 @ControllerAdvice
 public class GlobalExceptionAdvice {
-
+    
     @ResponseBody // 本次的处理是基于Rest风格完成的
     @ExceptionHandler(Exception.class)
-    public Object exceptionHandler(Exception exception) {
+    public Object exceptionHandler(Exception exception){
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         HttpServletResponse response = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getResponse();
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String,Object> map = new HashMap<String,Object>();
         map.put("message", exception.getMessage()); // 直接获取异常信息
         map.put("status", HttpStatus.INTERNAL_SERVER_ERROR_500); // 设置一个HTTP状态码
         map.put("exception", exception.getClass().getName()); // 获取异常类型
@@ -878,22 +870,16 @@ public class GlobalExceptionAdvice {
     }
 }
 ```
-
-## 整合actuator
-
-> pom引入监控包
-
+##整合actuator
+>pom引入监控包
 ```xml
-
-<dependency>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-actuator</artifactId>
-</dependency>
+  <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-actuator</artifactId>
+  </dependency>
 ```
-
-> 配置yml文件，打开所有应用监控
+>配置yml文件，打开所有应用监控
 > 相关节点访问路径：[https://www.cnblogs.com/JpfBlog66/p/14237909.html](https://www.cnblogs.com/JpfBlog66/p/14237909.html)
-
 ```yaml
 management:
   endpoints:
@@ -910,17 +896,16 @@ info:
   app:
     name: SpringBoot微服务
 ```
+>自定义endpoint
 
-> 自定义endpoint
-
-|注解    |描述    |类比
+|注解	|描述	|类比
 |------ |----:  |----
-|@Endpoint|    该注解的类可以通过http查看也可以通过jmx查看，他是在两个地方注册    |相当于springmvc中的RestController和JMX中MBean的集合
-|@JmxEndpoint    |该注解的类开放的是JMX接口    |相当于JMX中的MBean
-|@WebEndpoint    |该注解的类开饭的是http接口    |相当于mvc当中的RestController
-|WriteOperation    |http-POST请求    |相当于mvc中的@PostMapping
-|@ReadOperation    |http- GET请求    |相当于mvc中的@GetMapping
-|@DeleteOpretation    |http- DELETE请求    |相当于mvc中的@DeleteMapping
+|@Endpoint|	该注解的类可以通过http查看也可以通过jmx查看，他是在两个地方注册	|相当于springmvc中的RestController和JMX中MBean的集合
+|@JmxEndpoint	|该注解的类开放的是JMX接口	|相当于JMX中的MBean
+|@WebEndpoint	|该注解的类开饭的是http接口	|相当于mvc当中的RestController
+|WriteOperation	|http-POST请求	|相当于mvc中的@PostMapping
+|@ReadOperation	|http- GET请求	|相当于mvc中的@GetMapping
+|@DeleteOpretation	|http- DELETE请求	|相当于mvc中的@DeleteMapping
 
 ```java
 
@@ -936,180 +921,3 @@ public class MyEndPoint {
 }
 
 ```
-
-## 整合日志
-
-* 1.常规使用log日志方式，使用工厂方法获取日志对象
-
-```java
-
-@RestController
-@RequestMapping("/log4j")
-public class Log4jController {
-    private final Logger logger = LoggerFactory.getLogger(Log4jController.class);
-
-    @RequestMapping("/show")
-    public Object show(String message) {
-        logger.trace("trace 常规日志输出-->{}", message);
-        logger.info("info 常规日志输出-->{}", message);
-        logger.debug("debug 常规日志输出-->{}", message);
-        logger.warn("WARN 常规日志输出-->{}", message);
-        logger.error("error 常规日志输出-->{}", message);
-        return message;
-    }
-}
-```
-
-> 配置项目日志输出级别
-
-```yaml
-logging:
-  level: # 需要配置Map集合
-    root: info # 基本的日志级别
-    com:
-      liuxc:
-        www:
-          microboot:
-            start:
-              web: trace #指定路径日志级别
-```
-
-* 2.整合使用lombok日志注解
-
-> 使用该注解会在类使用log对象，可直接使用。
-
-```java
-
-@RestController
-@RequestMapping("/log4j")
-@Slf4j
-public class Log4jController {
-    //private final Logger logger = LoggerFactory.getLogger(Log4jController.class);
-    @RequestMapping("/show")
-    public Object show(String message) {
-        log.trace("trace 常规日志输出-->{}", message);
-        log.info("info 常规日志输出-->{}", message);
-        log.debug("debug 常规日志输出-->{}", message);
-        log.warn("WARN 常规日志输出-->{}", message);
-        log.error("error 常规日志输出-->{}", message);
-        return message;
-    }
-}
-```
-
-```yaml
-logging:
-  level: # 需要配置Map集合
-    root: info # 基本的日志级别
-    com:
-      liuxc:
-        www:
-          microboot:
-            start:
-              web: trace #指定路径日志级别
-  file:
-    path: logs/microboot #配置日志输出文件路径
-  pattern:
-    console: "%clr(%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSS}}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"
-    file: "%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSS}}${LOG_LEVEL_PATTERN:-%5p} ${PID:- } --- [%t] %-40.40logger{39} : %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"
-```
-
-* 3.整合使用logback
-
-> 在项目配置中加logback-spring.xml配置文件详细建配置文件
-
-* 4.动态修改项目日志级别
-
-> SpringBoot2.0之后可以通过actuator动态调整日志级别，主要是通过暴露loggers这个endpoint来实现
->> 需要引入actuator
-
-```xml
-
-<dependency>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-actuator</artifactId>
-</dependency>
-```
-
-> > 开启日志访问点
-
-```yaml
-management:
-  endpoints:
-    web:
-      exposure:
-        include: '*' #暴露所有服务
-      base-path: /actuator #访问的父路径
-```
-
-> > 访问路径http://localhost:8081/actuator/loggers 查看项目日志级别
-> > 动态修改日志级别发送POST请求到：http://[ip]:[port]/actuator/loggers/[包路径]
-> > 需要在body中指定configuredLevel参数； 比如修改整个项目日志级别为error
-
-## 自动装配
-
-> 常规注解
->> @Configuration 表示为一个配置bean 对象
-> > @ConditionalOnClass(Flux.class) 表示类存在的情况下才初始化
-> > @EnableConfigurationProperties({ WebEndpointProperties.class }) application.yml配置的属性配置类
-> > @Import(EnableConfigurationPropertiesRegistrar.class) 表示导入配置类
-> > 要想使用@Import本身有三种不同的处理形式：类导入、ImportSelector导入、ImportBeanDefinitionRegistrar导入
-
-* Import 的三种导入方式
-
-> 方式1 直接用导入配置类
-
-```java
-
-@Configuration
-@Import(User.class)
-public class UserAutoConfig {
-
-}
-```
-
-> 方式2 ImportSelector导入 如果按方式一的方式需要注册很多bean时，就可以使用这种方式
-
-```java
-  //编写 importSelector扫描包
-public class DefaultImportSelector implements ImportSelector {
-    @Override
-    public String[] selectImports(AnnotationMetadata importingClassMetadata) {
-
-        return new String[]{" com.liuxc.www.autostart.domain.User"}; //配置需要扫描类的全路径
-    }
-}
-
-@Configuration
-//导入ImportSelector实现类
-@Import(DefaultImportSelector.class)
-public class UserAutoConfig {
-
-}
-```
-
-> 方式3 以上的操作市级上都是由spring容器负责了Bean的注册，如果开发者现在希望自己来进行一些bean的注册处理，则可以使用ImportBeanDefinitionRegistrar
-
-```java
-  public class DefaultImportBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar {
-    @Override
-    public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
-        //创建bean
-        RootBeanDefinition beanDefinition = new RootBeanDefinition(User.class);
-        //注册bean
-        registry.registerBeanDefinition("userBean", beanDefinition);
-
-    }
-}
-
-@Configuration
-@Import(DefaultImportBeanDefinitionRegistrar.class)
-public class UserAutoConfig {
-
-}
-
-```
-
-
-
-
